@@ -7,4 +7,4 @@ deploy:
   }
   app: lomse-strategy-guides-app
   on:
-    repo: Yitzi2/LOMSE-strategy-guides-app
+    repo: Yitzi2/LOMSE-strategy-guides-ap
