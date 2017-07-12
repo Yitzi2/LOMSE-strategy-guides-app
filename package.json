@@ -1,0 +1,24 @@
+{
+  "name": "lomse-strategy-guides",
+  "version": "1.0.0",
+  "description": "A system for creating and viewing strategy guides for the game Lords of Magic: Special Edition",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.15.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yitzi2/LOMSE-strategy-guides-app.git"
+  },
+  "author": "Yitzhak Kornbluth",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Yitzi2/LOMSE-strategy-guides-app/issues"
+  },
+  "homepage": "https://github.com/Yitzi2/LOMSE-strategy-guides-app#readme"
+}
