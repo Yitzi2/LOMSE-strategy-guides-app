@@ -9,7 +9,7 @@ app.use(express.static('public'));
 app.use(morgan('common'));
 let server;
 
-function runServer (database_url = config.DATABASE_URL) {
+function runServer (database_url = DATABASE_URL) {
 	return new Promise ((res, rej) => {
 		const port = process.env.PORT || 8080;
 		app.database_url = database_url;
@@ -30,6 +30,11 @@ function closeServer () {
 		});
 	});
 }
+
+/*app.post('/users', (req, res) => {
+
+});*/
+
 
 if (require.main === module) {
   runServer().catch(err => console.error(err));
