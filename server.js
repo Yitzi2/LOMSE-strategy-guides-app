@@ -67,7 +67,10 @@ app.post('/users', (req, res) => {
 			console.error(err);
 			res.status(500).send(`Database access error: ${err}`)
 		})
-		.then(() => res.status(201).json({req.body.username, req.body.password}))
+		.then(() => res.status(201).json({
+			"username": req.body.username, 
+			"password":req.body.password
+		}))
 		.catch(err => {
 			console.error(err);
 			res.status(500).send(`Server error: ${err}`)
