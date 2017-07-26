@@ -63,7 +63,7 @@ app.post('/users', (req, res) => {
 		'${doubleQuotes(req.body.username)}', 
 		'${doubleQuotes(bcrypt.hashSync(req.body.password, 10))}');`;
 	app.pool.query(queryText)
-		.then(res => res.status(201).json({username, password}))
+		.then(() => res.status(201).json({username, password}))
 		.catch(err => {
 			console.error(err);
 			res.status(500).send(`Database access error: ${err}`)
