@@ -25,10 +25,10 @@ function doubleQuotes(str) {
 function runServer (database_url = DATABASE_URL) {
 	return new Promise ((res, rej) => {
 		const port = process.env.PORT || 8080;
-		server = http.createServer(/*{
+		server = https.createServer({
 			key: SSL_PRIVATE_KEY,
 			cert: SSL_CERTIFICATE
-		}, */app)
+		}, app)
 		.listen(port, () => {
 			console.log(`Server is listening on port ${port}`);
 			const pool = new pg.Pool({connectionString: database_url});
