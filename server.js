@@ -3,10 +3,12 @@
 const express = require('express');
 const morgan = require('morgan');
 const app = express();
-const {DATABASE_URL} = require('./config');
+const {DATABASE_URL, SSL_PRIVATE_KEY, SSL_CERTIFICATE} = require('./config');
 const pg = require('pg');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
+const https = require('https');
+const http = require('http');
 
 pg.defaults.ssl = true;
 
@@ -16,20 +18,24 @@ app.use(bodyParser.json());
 
 let server;
 
-function doubleQuotes(string) {
-	return string.replace("'", "''");
+function doubleQuotes(str) {
+	return str.replace(/'/g, "''");
 }
 
 function runServer (database_url = DATABASE_URL) {
 	return new Promise ((res, rej) => {
 		const port = process.env.PORT || 8080;
-		server = app.listen(port, () => {
+		server = https.createServer({
+			key: SSL_PRIVATE_KEY,
+			cert: SSL_CERTIFICATE
+		}, app)
+		.listen(port, () => {
 			console.log(`Server is listening on port ${port}`);
 			const pool = new pg.Pool({connectionString: database_url});
 			app.pool = pool;
-			res()
+			res();
 			})
-		.on('error', err => rej(err))			
+		.on('error', err => rej(err))	
 	});
 }
 
@@ -55,10 +61,17 @@ app.post('/users', (req, res) => {
 	}
 	const queryText = `insert into users (username, hashedpassword) values(
 		'${doubleQuotes(req.body.username)}', 
-		'${doubleQuotes(bcrypt.hash(req.body.password, 10).then(h=>h))}');`;
+		'${doubleQuotes(bcrypt.hashSync(req.body.password, 10))}');`;
 	app.pool.query(queryText)
 		.then(res => res.status(201).json({username, password}))
-		.catch(err => res.status(500).send(`Database access error: ${err}`));
+		.catch(err => {
+			console.error(err);
+			res.status(500).send(`Database access error: ${err}`)
+		});
+});
+
+app.get('/users', (req, res) => {
+	res.status(200).send("working fine");
 });
 
 

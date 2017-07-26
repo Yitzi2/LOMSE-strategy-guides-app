@@ -5,7 +5,6 @@ const should = chai.should();
 const {app, runServer, closeServer} = require('../server');
 const {TEST_DATABASE_URL} = require('../config');
 
-
 describe('user data tests', function () {
 	before(function(done) {
 		TEST_DATABASE_URL
