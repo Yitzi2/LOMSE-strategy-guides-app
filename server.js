@@ -66,13 +66,12 @@ app.post('/users', (req, res) => {
 		.catch(err => {
 			console.error(err);
 			res.status(500).send(`Database access error: ${err}`)
-		}
+		})
 		.then(() => res.status(201).json({req.body.username, req.body.password}))
 		.catch(err => {
 			console.error(err);
 			res.status(500).send(`Server error: ${err}`)
-		})
-		);
+		});
 });
 
 app.get('/users', (req, res) => {
