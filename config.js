@@ -18,7 +18,19 @@ exports.TEST_DATABASE_URL = new Promise ((resolve, reject) => {
 		request.get(options, (err, res) => resolve(res.TEST_DATABASE_URL));
 	}
 });
-if (process.env.SSL_PRIVATE_KEY) 
-	exports.SSL_PRIVATE_KEY = process.env.SSL_PRIVATE_KEY;
-else exports.SSL_PRIVATE_KEY = fs.readFileSync('key.pem', 'utf8');
-exports.SSL_CERTIFICATE = fs.readFileSync('crt.pem', 'utf8');
+
+exports.workaroundConnect = {
+	query: function (queryText) {
+		const options = {
+			url: "https://pg-access.herokuapp.com/",
+			body: queryText
+		};
+		return new Promise ((resolve, reject) => {
+			request.get(options, (err, response) => {
+				if (err) reject(err);
+				else resolve(response);
+			});
+		});
+	}
+	//Other methods go here.
+};

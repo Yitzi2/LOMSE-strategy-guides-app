@@ -1,28 +1,31 @@
 const chai = require('chai');
 chai.use(require('chai-http'));
 const should = chai.should();
-
 const {app, runServer, closeServer} = require('../server');
-const {TEST_DATABASE_URL} = require('../config');
+const {TEST_DATABASE_URL, workaroundConnect} = require('../config');
 
 describe('user data tests', function () {
 	before(function(done) {
-		TEST_DATABASE_URL
-			.then(url => runServer(url))
+		if (process.env.CAN_CONNECT_DIRECTLY) {//May be undefined if cannot.
+			TEST_DATABASE_URL
+				.then(url => runServer(url))
+				.then(done);
+		}
+		else runServer(workaroundConnect)
 			.then(done);
   	});
 
 	beforeEach(function () {
 		queryText = "delete * from users;" //Clear database for next test.
-		return app.pool.query(queryText);
+		return app.db.query(queryText);
 	});
 
 
 	after(function(done) {
 		queryText = "delete * from users;" //Clear database.
-		app.pool.query(queryText)
+		app.db.query(queryText)
 			.then(closeServer())
-			.then(done);
+			.then(() => done());
 	});
 
 	describe ('users POST endpoint', function () {
@@ -34,12 +37,12 @@ describe('user data tests', function () {
 				.then(function (res) {
 					res.should.have.status(201);
 					res.should.be.json;
-					res.should.deep.equal.newUser;
+					res.body.should.deep.equal(newUser);
 					const queryText = "select hashedpassword from users;"
-					const hashedPassword = app.pool.query(queryText).then(r => r)
+					const hashedPassword = app.db.query(queryText).then(r => r)
 						.then
 					console.log(`hashed password was 
-						${app.pool.query(queryText)}`);
+						${app.db.query(queryText)}`);
 						//To manually check it isn't close to plaintext.
 			});
 		});
@@ -51,10 +54,10 @@ describe('user data tests', function () {
 				.send(newUser)
 				.then(function (res) {
 					const queryText = "select hashedpassword from users;"
-					const hashedPassword = app.pool.query(queryText)
+					const hashedPassword = app.db.query(queryText)
 						.then(function (queryResult) {
 							console.log(`hashed password was ${queryResult}`);
-							queryResult.should.not.equal.newUser.password;
+							queryResult.should.not.equal(newUser.password);
 						});
 			});
 		});
@@ -71,10 +74,10 @@ describe('user data tests', function () {
 						.then(function (res2) {
 							res.should.have.status(201);
 							res.should.be.json;
-							res.should.deep.equal.newUser;
+							res.body.should.deep.equal(newUser);
 							res2.should.have.status(201);
 							res2.should.be.json;
-							res2.should.deep.equal.newUser2;
+							res2.body.should.deep.equal(newUser2);
 						});
 			});
 		});
@@ -83,10 +86,20 @@ describe('user data tests', function () {
 			return chai.request(app)
 				.post('/users')
 				.send(newUser)
+				/*Status codes of 4XX are currently treated as errors, so need
+				to be caught.  A then block is needed to ensure failure if it
+				returns a 2XX status code, and repeating the test allows for
+				forward compatibility.*/
 				.then(function (res) {
 					res.should.have.status(400);
-					res.body.should.be.a("string");
-					res.body.should.equal("Missing username in request body");
+					res.text.should.be.a("string");
+					res.text.should.equal("Missing username in request body");
+			})
+				.catch(function (res) {
+					res.should.have.status(400);
+					console.log(Object.keys(res));
+					res.response.text.should.be.a("string");
+					res.response.text.should.equal("Missing username in request body");
 			});
 		});
 	});
