@@ -23,11 +23,15 @@ exports.workaroundConnect = {
 	query: function (queryText) {
 		const options = {
 			url: "https://pg-access.herokuapp.com/",
-			body: queryText
+			body: queryText,
+			headers: { 'content-type': 'text/plain' }
 		};
 		return new Promise ((resolve, reject) => {
-			request.get(options, (err, response) => {
+			request.post(options, (err, response) => {
 				if (err) reject(err);
+				else if (response.statusCode === 500) {
+					reject(response.body);
+				}
 				else resolve(response);
 			});
 		});

@@ -59,14 +59,11 @@ app.post('/users', (req, res) => {
 		'${doubleQuotes(req.body.username)}', 
 		'${doubleQuotes(bcrypt.hashSync(req.body.password, 10))}');`;
 	app.db.query(queryText)
-		.then(() => res.status(201).json({
+		.then((queryRes) => res.status(201).json({
 			"username": req.body.username, 
 			"password": req.body.password
 		}))
-		.catch(err => {
-			console.error(err);
-			res.status(500).send(err);
-		});
+		.catch(err => res.status(500).send(err));
 });
 
 if (require.main === module) {

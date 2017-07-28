@@ -5,6 +5,7 @@ const {app, runServer, closeServer} = require('../server');
 const {TEST_DATABASE_URL, workaroundConnect} = require('../config');
 
 describe('user data tests', function () {
+	this.timeout(15000);
 	before(function(done) {
 		if (process.env.CAN_CONNECT_DIRECTLY) {//May be undefined if cannot.
 			TEST_DATABASE_URL
@@ -16,13 +17,13 @@ describe('user data tests', function () {
   	});
 
 	beforeEach(function () {
-		queryText = "delete * from users;" //Clear database for next test.
+		queryText = "delete from users;" //Clear database for next test.
 		return app.db.query(queryText);
 	});
 
 
 	after(function(done) {
-		queryText = "delete * from users;" //Clear database.
+		queryText = "delete from users;" //Clear database.
 		app.db.query(queryText)
 			.then(closeServer())
 			.then(() => done());
@@ -38,12 +39,6 @@ describe('user data tests', function () {
 					res.should.have.status(201);
 					res.should.be.json;
 					res.body.should.deep.equal(newUser);
-					const queryText = "select hashedpassword from users;"
-					const hashedPassword = app.db.query(queryText).then(r => r)
-						.then
-					console.log(`hashed password was 
-						${app.db.query(queryText)}`);
-						//To manually check it isn't close to plaintext.
 			});
 		});
 		it ('should not store password in plaintext', function () {
@@ -54,9 +49,13 @@ describe('user data tests', function () {
 				.send(newUser)
 				.then(function (res) {
 					const queryText = "select hashedpassword from users;"
-					const hashedPassword = app.db.query(queryText)
+					app.db.query(queryText)
 						.then(function (queryResult) {
-							console.log(`hashed password was ${queryResult}`);
+							console.log("hashed password was "+
+								JSON.parse(queryResult.body)
+								.rows[0].hashedpassword);
+								/*To manually check that 
+								it isn't even close to plaintext.*/
 							queryResult.should.not.equal(newUser.password);
 						});
 			});
@@ -81,15 +80,41 @@ describe('user data tests', function () {
 						});
 			});
 		});
+		it ('should not be able to create two users with the same username', function () {
+			const newUser = {username: "Order", password: "Chaos"};
+			const newUser2 = {username: "Order", password: "Death"};
+			return chai.request(app)
+				.post('/users')
+				.send(newUser)
+				.then(function (res) {
+
+					return chai.request(app)
+						.post('/users')
+						.send(newUser2)
+						/*Status codes of 4XX and 5XX are currently treated as 
+						errors, so need to be caught.  A then block is also 
+						needed to ensure failure if it returns a 2XX status code, 
+						nd repeating the test in the then block allows for forward 
+						compatibility if 4XX and 5XX cease to be treated as errors.*/
+						.then(function (res2) {
+							res2.should.have.status(500);
+							JSON.parse(res2.response.text).detail.should.be.a("string");
+							JSON.parse(res2.response.text).detail.should.equal(
+								"Key (username)=(Order) already exists.");
+						})
+						.catch(function (res2) {
+							res2.should.have.status(500);
+							JSON.parse(res2.response.text).detail.should.be.a("string");
+							JSON.parse(res2.response.text).detail.should.equal(
+								"Key (username)=(Order) already exists.");
+						});
+				});
+		});
 		it ('should return 400 and error message if username is missing', function () {
 			const newUser = {password: "Chaos"};
 			return chai.request(app)
 				.post('/users')
 				.send(newUser)
-				/*Status codes of 4XX are currently treated as errors, so need
-				to be caught.  A then block is needed to ensure failure if it
-				returns a 2XX status code, and repeating the test allows for
-				forward compatibility.*/
 				.then(function (res) {
 					res.should.have.status(400);
 					res.text.should.be.a("string");
@@ -97,7 +122,6 @@ describe('user data tests', function () {
 			})
 				.catch(function (res) {
 					res.should.have.status(400);
-					console.log(Object.keys(res));
 					res.response.text.should.be.a("string");
 					res.response.text.should.equal("Missing username in request body");
 			});
