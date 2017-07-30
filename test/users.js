@@ -10,7 +10,7 @@ describe('user data tests', function () {
 	before(function(done) {
 		if (process.env.CAN_CONNECT_DIRECTLY) {//May be undefined if cannot.
 			TEST_DATABASE_URL
-				.then(url => runServer(url))
+				.then(url => {console.log(url);runServer(url);})
 				.then(done);
 		}
 		else runServer(workaroundConnect)
