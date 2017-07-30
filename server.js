@@ -27,7 +27,7 @@ function runServer (connectMode = DATABASE_URL) {
 			console.log(`Server is listening on port ${port}`);
 			if (typeof connectMode === "object") app.db = connectMode;
 			else if (typeof connectMode === "string")
-				app.db = new pg.Pool({connectionString: database_url});
+				app.db = new pg.Pool({connectionString: connectMode});
 			else rej(`Invalid connectMode: ${typeof (connectMode)} ${connectMode}`);
 			res();
 		})
