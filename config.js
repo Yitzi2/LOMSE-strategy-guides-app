@@ -15,7 +15,8 @@ exports.TEST_DATABASE_URL = new Promise ((resolve, reject) => {
 				'Authorization': `Bearer ${HEROKU_AUTH}`
 			}
 		};
-		request.get(options, (err, res) => resolve(res.TEST_DATABASE_URL));
+		request.get(options, (err, res) => {console.log("foo"+res);
+			resolve(res.TEST_DATABASE_URL);});
 	}
 });
 
