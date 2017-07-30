@@ -30,9 +30,9 @@ exports.workaroundConnect = {
 			request.post(options, (err, response) => {
 				if (err) reject(err);
 				else if (response.statusCode === 500) {
-					reject(response.body);
+					reject(JSON.parse(response.body));
 				}
-				else resolve(response);
+				else resolve(JSON.parse(response.body));
 			});
 		});
 	}

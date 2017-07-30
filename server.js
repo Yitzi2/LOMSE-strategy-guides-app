@@ -55,15 +55,27 @@ app.post('/users', (req, res) => {
 			return res.status(400).send(message);
 	    }
 	}
+	const username = req.body.username;
+	const password = req.body.password;
+	if (username === "") return res.status(400).send("username cannot be blank");
 	const queryText = `insert into users (username, hashedpassword) values(
-		'${doubleQuotes(req.body.username)}', 
-		'${doubleQuotes(bcrypt.hashSync(req.body.password, 10))}');`;
+		'${doubleQuotes(username)}', 
+		'${doubleQuotes(bcrypt.hashSync(password, 10))}');`;
 	app.db.query(queryText)
 		.then((queryRes) => res.status(201).json({
 			"username": req.body.username, 
 			"password": req.body.password
 		}))
-		.catch(err => res.status(500).send(err));
+		.catch(
+			err => {
+				if (err.detail === 
+					`Key (username)=(${req.body.username}) already exists.`)
+					res.status(409).send("username already taken");
+				else {
+					console.log(err);
+					res.status(500).send(err.detail);
+				}
+			});
 });
 
 if (require.main === module) {
