@@ -9,9 +9,9 @@ function activateForm () {
 			const username = $("#username").val();
 			const password = $("#password").val();
 			$.ajax ({
-				url: "http://localhost:8080/users",
+				url: "/users",
 				method: "POST",
-				data: '{"username": "Yitzi", "password": "ab"}',
+				data: '{"username": "${username}", "password": "${password}"}',
 				dataType: "json",
 				success: () => window.location.href('/'),
 				error: err => {
