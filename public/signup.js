@@ -11,8 +11,8 @@ function activateForm () {
 			$.ajax ({
 				url: "/users",
 				method: "POST",
-				data: '{"username": "${username}", "password": "${password}"}',
-				dataType: "json",
+				data: {"username": username, "password": password},
+				dataType: "text",
 				success: () => window.location.href('/'),
 				error: err => {
 					if (err.status >= 500) $(".error").text(err.statusText);
