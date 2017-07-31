@@ -8,14 +8,10 @@ const {TEST_DATABASE_URL, workaroundConnect} = require('../config');
 describe('user data tests', function () {
 	this.timeout(15000);
 	before(function(done) {
-		if (process.env.CAN_CONNECT_DIRECTLY) {//May be undefined if cannot.
-			TEST_DATABASE_URL
-				.then(url => runServer(url))
-				.then(done);
-		}
-		else runServer(workaroundConnect)
+		TEST_DATABASE_URL
+			.then(url => runServer(url))
 			.then(done);
-  	});
+	});
 
 	beforeEach(function () {
 		const queryText = "delete from users;" //Clear database for next test.

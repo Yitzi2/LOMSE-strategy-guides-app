@@ -13,6 +13,7 @@ pg.defaults.ssl = true;
 app.use(express.static('public'));
 app.use(morgan('common'));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
 
 let server;
 
@@ -20,15 +21,12 @@ function doubleQuotes(str) {
 	return str.replace(/'/g, "''");
 }
 
-function runServer (connectMode = DATABASE_URL) {
+function runServer (database_url = DATABASE_URL) {
 	return new Promise ((res, rej) => {
 		const port = process.env.PORT || 8080;
 		server = app.listen(port, () => {
 			console.log(`Server is listening on port ${port}`);
-			if (typeof connectMode === "object") app.db = connectMode;
-			else if (typeof connectMode === "string")
-				app.db = new pg.Pool({connectionString: connectMode});
-			else rej(`Invalid connectMode: ${typeof (connectMode)} ${connectMode}`);
+			app.db = new pg.Pool({connectionString: database_url});
 			res();
 		})
 		.on('error', err => rej(err))	
@@ -47,11 +45,15 @@ function closeServer () {
 
 app.post('/users', (req, res) => {
 	const requiredFields = ['username', 'password'];
+	console.log(req.headers);
+	console.log(req.rawHeaders);
+	console.log(req.params);
+	console.log(req.query);
+	console.log(req.body);
 	for (let i=0; i<requiredFields.length; i++) {
 		const field = requiredFields[i];
 		if (!(field in req.body)) {
 			const message = `Missing ${field} in request body`
-			console.error(message);
 			return res.status(400).send(message);
 	    }
 	}
@@ -73,7 +75,7 @@ app.post('/users', (req, res) => {
 					res.status(409).send("username already taken");
 				else {
 					console.log(err);
-					res.status(500).send(err.detail);
+					res.status(500).send();
 				}
 			});
 });

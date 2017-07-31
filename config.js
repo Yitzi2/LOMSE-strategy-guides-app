@@ -20,23 +20,3 @@ exports.TEST_DATABASE_URL = new Promise ((resolve, reject) => {
 		);
 	}
 });
-
-exports.workaroundConnect = {
-	query: function (queryText) {
-		const options = {
-			url: "https://pg-access.herokuapp.com/",
-			body: queryText,
-			headers: { 'content-type': 'text/plain' }
-		};
-		return new Promise ((resolve, reject) => {
-			request.post(options, (err, response) => {
-				if (err) reject(err);
-				else if (response.statusCode === 500) {
-					reject(JSON.parse(response.body));
-				}
-				else resolve(JSON.parse(response.body));
-			});
-		});
-	}
-	//Other methods go here.
-};

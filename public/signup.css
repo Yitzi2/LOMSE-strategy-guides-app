@@ -1,0 +1,34 @@
+body, html, main {
+	height: 100%;
+	text-align: center;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding-bottom: 40px;
+}
+
+form {
+	display: inline-block;
+	border: 1px blue solid;
+	padding: 5px;
+}
+
+label {
+	display: inline-block;
+	text-align: right;
+	width: 9em;
+}
+
+label, input, button {
+	margin: 2px;
+}
+
+.error {
+	color: red;
+}
